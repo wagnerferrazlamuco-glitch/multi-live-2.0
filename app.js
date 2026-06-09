@@ -61,8 +61,8 @@ async function inicializarApp() {
     await checkAuthStatus();
     setupEventListeners();
   } catch (error) {
-    console.error('❌ Erro crítico ao inicializar o aplicativo:', error);
-    mostrarAvisoBanner("❌ Não foi possível conectar ao Supabase. Verifique a configuração.");
+    console.error('Erro crítico ao inicializar o aplicativo:', error);
+    mostrarAvisoBanner("Não foi possível conectar ao Supabase. Verifique a configuração.");
   }
 }
 
@@ -79,14 +79,14 @@ async function diagnosticarConexao() {
         error.message.includes("apikey")
       ) {
         mostrarAvisoBanner(
-          "❌ Chave de API inválida — verifique supabase-config.js",
+          "Chave de API inválida — verifique supabase-config.js",
         );
       }
     }
   } catch (e) {
-    console.error("❌ Falha ao conectar com Supabase:", e);
+    console.error("Falha ao conectar com Supabase:", e);
     mostrarAvisoBanner(
-      "❌ Não foi possível conectar ao Supabase. Verifique URL e chave.",
+      "Não foi possível conectar ao Supabase. Verifique URL e chave.",
     );
   }
 }
