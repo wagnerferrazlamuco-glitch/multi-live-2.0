@@ -35,9 +35,9 @@ const LOCKOUT_MS = 60_000; // 1 minuto
 async function inicializarApp() {
   try {
     // Busca as chaves do Supabase na API local ou de produção
-    const response = await fetch('/api/config');
+    const response = await fetch("/api/config");
     if (!response.ok) {
-      throw new Error('Falha ao buscar configurações do Supabase na API');
+      throw new Error("Falha ao buscar configurações do Supabase na API");
     }
     const config = await response.json();
 
@@ -52,7 +52,7 @@ async function inicializarApp() {
           persistSession: true,
           detectSessionInUrl: true,
         },
-      }
+      },
     );
 
     setupAuthToggle();
@@ -61,8 +61,10 @@ async function inicializarApp() {
     await checkAuthStatus();
     setupEventListeners();
   } catch (error) {
-    console.error('Erro crítico ao inicializar o aplicativo:', error);
-    mostrarAvisoBanner("Não foi possível conectar ao Supabase. Verifique a configuração.");
+    console.error("Erro crítico ao inicializar o aplicativo:", error);
+    mostrarAvisoBanner(
+      "Não foi possível conectar ao Supabase. Verifique a configuração.",
+    );
   }
 }
 
@@ -527,14 +529,18 @@ async function addLive() {
       return;
     }
 
-    const { error } = await supabaseClient.from("user_lives").insert([
-      {
-        user_id: currentUser.id,
-        url: rawUrl,
-        type: embedData.type,
-        embed_id: embedData.id,
-      },
-    ]);
+    const { data: inserted, error } = await supabaseClient
+      .from("user_lives")
+      .insert([
+        {
+          user_id: currentUser.id,
+          url: rawUrl,
+          type: embedData.type,
+          embed_id: embedData.id,
+        },
+      ])
+      .select()
+      .single();
 
     if (error) {
       showToast("Erro ao adicionar live.", "error");
@@ -542,10 +548,15 @@ async function addLive() {
       return;
     }
 
+    if (inserted) {
+      addLiveToDOM(inserted);
+      updateLiveCountBadge();
+      updateGridLayout();
+    }
+
     urlInput.value = "";
     urlInput.focus();
     showToast("Live adicionada!", "success");
-    await renderLives();
   } catch (err) {
     showToast("Erro ao adicionar live.", "error");
     console.error(err);
@@ -570,11 +581,11 @@ async function removeLive(liveId) {
       return;
     }
 
-    const container = document.getElementById(`live-${liveId}`);
-    if (container) {
-      container.style.animation = "fadeOut 0.25s ease-out both";
+    const block = document.getElementById(`live-${liveId}`);
+    if (block) {
+      block.style.animation = "fadeOut 0.25s ease-out both";
       setTimeout(() => {
-        container.remove();
+        block.remove();
         updateGridLayout();
         updateLiveCountBadge();
       }, 250);
@@ -596,6 +607,39 @@ function refreshLive(id) {
   }, 100);
 }
 
+function refreshLive(id) {
+  const iframe = document.querySelector(`iframe[data-id="${id}"]`);
+  if (!iframe) return;
+  const src = iframe.src;
+  iframe.src = "";
+  setTimeout(() => {
+    iframe.src = src;
+  }, 100);
+}
+
+/**
+ * Simula atualização de espectadores
+ */
+function updateViewerCount(liveId) {
+  const viewerEl = document.querySelector(
+    `[data-viewers][data-live-id="${liveId}"]`,
+  );
+  if (!viewerEl) return;
+
+  const viewers = Math.floor(Math.random() * 5000) + 100;
+  const displayText =
+    viewers >= 1000 ? `${(viewers / 1000).toFixed(1)}k` : viewers.toString();
+  viewerEl.textContent = `👁️ ${displayText}`;
+}
+
+// Atualizar contadores de espectadores a cada 5 segundos
+setInterval(() => {
+  document.querySelectorAll("[data-viewers]").forEach((el) => {
+    const liveId = el.dataset.liveId;
+    if (liveId) updateViewerCount(liveId);
+  });
+}, 5000);
+
 function toggleFullscreen() {
   const isFS = document.body.classList.toggle("fullscreen-mode");
 
@@ -614,9 +658,10 @@ function toggleHeader() {
 
 // ===== DOM: ADICIONAR LIVE =====
 function addLiveToDOM(live) {
-  const container = document.createElement("div");
-  container.className = "live-container";
-  container.id = `live-${live.id}`;
+  const block = document.createElement("div");
+  block.className = "live-block";
+  block.id = `live-${live.id}`;
+  block.dataset.liveId = live.id;
 
   const platformClass = live.type === "youtube" ? "youtube" : "twitch";
   const platformLabel = live.type === "youtube" ? "▶ YouTube" : "🟣 Twitch";
@@ -628,22 +673,24 @@ function addLiveToDOM(live) {
     <button class="control-btn btn-remove" onclick="removeLive('${live.id}')" title="Remover" type="button" aria-label="Remover live">✕</button>
   `;
 
-  // Sandbox no iframe: bloqueia pop-ups, scripts desnecessários, mas permite player
-  container.innerHTML = `
-    <span class="live-platform-badge ${platformClass}" aria-hidden="true">${platformLabel}</span>
-    <div class="live-overlay">${controls}</div>
-    <iframe
-      data-id="${live.id}"
-      src="${getEmbedSrc(live)}"
-      allow="autoplay; encrypted-media; fullscreen"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
-      allowfullscreen
-      loading="lazy"
-      title="Live ${live.type} — ${live.embed_id}"
-    ></iframe>
+  block.innerHTML = `
+    <!-- VIDEO WRAPPER -->
+    <div class="live-video-wrapper">
+      <span class="live-platform-badge ${platformClass}" aria-hidden="true">${platformLabel}</span>
+      <div class="live-video-overlay">${controls}</div>
+      <iframe
+        data-id="${live.id}"
+        src="${getEmbedSrc(live)}"
+        allow="autoplay; encrypted-media; fullscreen"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+        allowfullscreen
+        loading="lazy"
+        title="Live ${live.type} — ${live.embed_id}"
+      ></iframe>
+    </div>
   `;
 
-  grid.appendChild(container);
+  grid.appendChild(block);
 }
 
 // ===== EMBED SRC =====
@@ -768,7 +815,7 @@ async function loadGenericLives() {
 // ===== BADGE DE CONTAGEM =====
 function updateLiveCountBadge(count) {
   if (count === undefined) {
-    count = document.querySelectorAll(".live-container").length;
+    count = document.querySelectorAll(".live-block").length;
   }
   if (!liveCountBadge) return;
   if (count > 0) {
@@ -781,12 +828,17 @@ function updateLiveCountBadge(count) {
 
 // ===== LAYOUT DO GRID =====
 function updateGridLayout() {
-  const containers = document.querySelectorAll(".live-container");
+  const containers = document.querySelectorAll(".live-block");
   const count = containers.length;
   if (count === 0) return;
 
+  const gridContainer = document.querySelector(".lives-grid-container");
+  if (!gridContainer) return;
+
   if (document.body.classList.contains("fullscreen-mode")) {
-    let cols, rows;
+    // No fullscreen, mantém 2x2 até 4 lives, depois expande
+    let cols = 2;
+    let rows = 2;
 
     if (count === 1) {
       cols = 1;
@@ -794,7 +846,10 @@ function updateGridLayout() {
     } else if (count === 2) {
       cols = 2;
       rows = 1;
-    } else if (count <= 4) {
+    } else if (count === 3) {
+      cols = 2;
+      rows = 2;
+    } else if (count === 4) {
       cols = 2;
       rows = 2;
     } else if (count <= 6) {
@@ -803,21 +858,41 @@ function updateGridLayout() {
     } else if (count <= 9) {
       cols = 3;
       rows = 3;
-    } else if (count <= 12) {
-      cols = 4;
+    } else {
+      cols = Math.ceil(Math.sqrt(count));
+      rows = Math.ceil(count / cols);
+    }
+
+    gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    gridContainer.style.gridAutoRows = `calc(100vh / ${rows})`;
+    gridContainer.style.height = "100vh";
+  } else {
+    let cols = 2;
+    let rows = Math.ceil(count / cols);
+
+    if (count === 1) {
+      cols = 1;
+      rows = 1;
+    } else if (count === 2) {
+      cols = 2;
+      rows = 1;
+    } else if (count === 3 || count === 4) {
+      cols = 2;
+      rows = 2;
+    } else if (count <= 6) {
+      cols = 3;
+      rows = 2;
+    } else if (count <= 9) {
+      cols = 3;
       rows = 3;
     } else {
       cols = Math.ceil(Math.sqrt(count));
       rows = Math.ceil(count / cols);
     }
 
-    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    grid.style.gridAutoRows = `calc(100vh / ${rows})`;
-    grid.style.height = "100vh";
-  } else {
-    grid.style.gridTemplateColumns = "repeat(auto-fit, minmax(420px, 1fr))";
-    grid.style.gridAutoRows = "auto";
-    grid.style.height = "auto";
+    gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    gridContainer.style.height = `calc(100vh - 120px)`;
   }
 }
 

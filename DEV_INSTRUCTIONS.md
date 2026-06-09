@@ -2,12 +2,10 @@
 
 1. Recomendado: executar serverless local com Vercel
 
-Instale o CLI do Vercel e rode o ambiente local:
+validar site de forma local
 
 ```bash
-npm install -g vercel
-vercel login
-vercel dev
+npx wrangler pages dev .
 ```
 
 Defina as variáveis de ambiente no painel do Vercel ou localmente (ex: `.env.local`) com:

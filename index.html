@@ -3,24 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MultiLive — assista múltiplas lives do YouTube e Twitch ao mesmo tempo." />
+    <meta
+      name="description"
+      content="MultiLive — assista múltiplas lives do YouTube e Twitch ao mesmo tempo."
+    />
     <meta name="theme-color" content="#6c3fff" />
     <!-- CSP básico: bloqueia inline scripts não autorizados e limita fontes externas -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <title>MultiLive</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   </head>
   <body>
-
     <!-- ===== TELA DE AUTENTICAÇÃO ===== -->
     <div id="auth-screen" role="main" aria-label="Área de autenticação">
       <div class="auth-bg-glow"></div>
       <div class="auth-container">
-
         <div class="auth-header">
           <div class="auth-logo" aria-label="MultiLive">
             <span class="logo-icon">▶</span>MultiLive
@@ -29,34 +33,77 @@
         </div>
 
         <div class="auth-tabs" role="tablist" aria-label="Modo de acesso">
-          <button id="login-tab" type="button" class="auth-tab active"
-            role="tab" aria-selected="true" aria-controls="login-form"
-            onclick="switchAuthMode('login')">
+          <button
+            id="login-tab"
+            type="button"
+            class="auth-tab active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="login-form"
+            onclick="switchAuthMode('login')"
+          >
             Entrar
           </button>
-          <button id="signup-tab" type="button" class="auth-tab"
-            role="tab" aria-selected="false" aria-controls="signup-form"
-            onclick="switchAuthMode('signup')">
+          <button
+            id="signup-tab"
+            type="button"
+            class="auth-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="signup-form"
+            onclick="switchAuthMode('signup')"
+          >
             Criar conta
           </button>
         </div>
 
         <!-- LOGIN -->
-        <form id="login-form" class="auth-form" role="tabpanel" aria-labelledby="login-tab" onsubmit="handleLogin(event)" novalidate>
+        <form
+          id="login-form"
+          class="auth-form"
+          role="tabpanel"
+          aria-labelledby="login-tab"
+          onsubmit="handleLogin(event)"
+          novalidate
+        >
           <div class="form-group">
             <label for="login-email">Email</label>
-            <input type="email" id="login-email" placeholder="seu@email.com"
-              autocomplete="email" required spellcheck="false" />
+            <input
+              type="email"
+              id="login-email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+              spellcheck="false"
+            />
           </div>
           <div class="form-group">
             <label for="login-password">Senha</label>
             <div class="input-password-wrap">
-              <input type="password" id="login-password" placeholder="••••••••"
-                autocomplete="current-password" required minlength="6" />
-              <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('login-password', this)" aria-label="Mostrar senha">👁</button>
+              <input
+                type="password"
+                id="login-password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+                minlength="6"
+              />
+              <button
+                type="button"
+                class="btn-toggle-pw"
+                onclick="togglePasswordVisibility('login-password', this)"
+                aria-label="Mostrar senha"
+              >
+                👁
+              </button>
             </div>
           </div>
-          <div class="auth-error" id="login-error" role="alert" aria-live="polite"></div>
+          <div
+            class="auth-error"
+            id="login-error"
+            role="alert"
+            aria-live="polite"
+          ></div>
           <button type="submit" class="auth-btn" id="login-submit-btn">
             <span class="btn-label">Entrar</span>
             <span class="btn-spinner hidden" aria-hidden="true"></span>
@@ -64,35 +111,93 @@
         </form>
 
         <!-- CADASTRO -->
-        <form id="signup-form" class="auth-form hidden" role="tabpanel" aria-labelledby="signup-tab" onsubmit="handleSignup(event)" novalidate>
+        <form
+          id="signup-form"
+          class="auth-form hidden"
+          role="tabpanel"
+          aria-labelledby="signup-tab"
+          onsubmit="handleSignup(event)"
+          novalidate
+        >
           <div class="form-group">
             <label for="signup-name">Nome</label>
-            <input type="text" id="signup-name" placeholder="Seu nome"
-              autocomplete="name" required maxlength="80" />
+            <input
+              type="text"
+              id="signup-name"
+              placeholder="Seu nome"
+              autocomplete="name"
+              required
+              maxlength="80"
+            />
           </div>
           <div class="form-group">
             <label for="signup-email">Email</label>
-            <input type="email" id="signup-email" placeholder="seu@email.com"
-              autocomplete="email" required spellcheck="false" />
+            <input
+              type="email"
+              id="signup-email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+              spellcheck="false"
+            />
           </div>
           <div class="form-group">
-            <label for="signup-password">Senha <span class="label-hint">(mín. 6 caracteres)</span></label>
+            <label for="signup-password"
+              >Senha <span class="label-hint">(mín. 6 caracteres)</span></label
+            >
             <div class="input-password-wrap">
-              <input type="password" id="signup-password" placeholder="••••••••"
-                autocomplete="new-password" required minlength="6" />
-              <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('signup-password', this)" aria-label="Mostrar senha">👁</button>
+              <input
+                type="password"
+                id="signup-password"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+              <button
+                type="button"
+                class="btn-toggle-pw"
+                onclick="togglePasswordVisibility('signup-password', this)"
+                aria-label="Mostrar senha"
+              >
+                👁
+              </button>
             </div>
-            <div class="password-strength" id="password-strength" aria-live="polite"></div>
+            <div
+              class="password-strength"
+              id="password-strength"
+              aria-live="polite"
+            ></div>
           </div>
           <div class="form-group">
             <label for="signup-password-confirm">Confirmar senha</label>
             <div class="input-password-wrap">
-              <input type="password" id="signup-password-confirm" placeholder="••••••••"
-                autocomplete="new-password" required minlength="6" />
-              <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('signup-password-confirm', this)" aria-label="Mostrar senha">👁</button>
+              <input
+                type="password"
+                id="signup-password-confirm"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+              <button
+                type="button"
+                class="btn-toggle-pw"
+                onclick="
+                  togglePasswordVisibility('signup-password-confirm', this)
+                "
+                aria-label="Mostrar senha"
+              >
+                👁
+              </button>
             </div>
           </div>
-          <div class="auth-error" id="signup-error" role="alert" aria-live="polite"></div>
+          <div
+            class="auth-error"
+            id="signup-error"
+            role="alert"
+            aria-live="polite"
+          ></div>
           <button type="submit" class="auth-btn" id="signup-submit-btn">
             <span class="btn-label">Criar conta</span>
             <span class="btn-spinner hidden" aria-hidden="true"></span>
@@ -104,41 +209,81 @@
         <button class="guest-btn" onclick="continueAsGuest()" type="button">
           Continuar como visitante
         </button>
-
       </div>
     </div>
 
     <!-- ===== HEADER ===== -->
-    <header id="main-header" aria-label="Barra de controles" style="display:none">
+    <header
+      id="main-header"
+      aria-label="Barra de controles"
+      style="display: none"
+    >
       <div class="header-left">
         <div class="logo" aria-label="MultiLive">
           <span class="logo-icon">▶</span>MultiLive
         </div>
-        <div class="live-count-badge" id="live-count-badge" aria-live="polite"></div>
+        <div
+          class="live-count-badge"
+          id="live-count-badge"
+          aria-live="polite"
+        ></div>
       </div>
 
       <div class="controls-top">
-        <div class="input-group" id="input-group-container" style="display:none">
+        <div
+          class="input-group"
+          id="input-group-container"
+          style="display: none"
+        >
           <span class="input-icon" aria-hidden="true">🔗</span>
-          <input type="url" id="live-url" placeholder="Cole o link do YouTube ou Twitch..."
-            autocomplete="off" spellcheck="false" aria-label="URL da live" />
-          <button class="btn-add" onclick="addLive()" type="button" aria-label="Adicionar live">
+          <input
+            type="url"
+            id="live-url"
+            placeholder="Cole o link do YouTube ou Twitch..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="URL da live"
+          />
+          <button
+            class="btn-add"
+            onclick="addLive()"
+            type="button"
+            aria-label="Adicionar live"
+          >
             Adicionar
           </button>
         </div>
 
         <div class="header-actions">
-          <button class="btn-icon" onclick="toggleFullscreen()" title="Modo tela cheia (F11)"
-            id="btn-fullscreen" style="display:none" aria-label="Tela cheia">
+          <button
+            class="btn-icon"
+            onclick="toggleFullscreen()"
+            title="Modo tela cheia (F11)"
+            id="btn-fullscreen"
+            style="display: none"
+            aria-label="Tela cheia"
+          >
             ⛶
           </button>
-          <button class="btn-icon" onclick="toggleHeader()" title="Minimizar menu"
-            id="btn-minimize" style="display:none" aria-label="Minimizar menu">
+          <button
+            class="btn-icon"
+            onclick="toggleHeader()"
+            title="Minimizar menu"
+            id="btn-minimize"
+            style="display: none"
+            aria-label="Minimizar menu"
+          >
             ↑
           </button>
           <div class="user-badge" id="user-info" aria-live="polite"></div>
-          <button class="btn-logout" onclick="handleLogout()" id="btn-logout"
-            style="display:none" type="button" aria-label="Sair">
+          <button
+            class="btn-logout"
+            onclick="handleLogout()"
+            id="btn-logout"
+            style="display: none"
+            type="button"
+            aria-label="Sair"
+          >
             Sair
           </button>
         </div>
@@ -146,23 +291,40 @@
     </header>
 
     <!-- MINI HEADER -->
-    <div id="mini-header" onclick="toggleHeader()" role="button" tabindex="0"
-      aria-label="Mostrar menu" onkeydown="if(event.key==='Enter')toggleHeader()">
+    <div
+      id="mini-header"
+      onclick="toggleHeader()"
+      role="button"
+      tabindex="0"
+      aria-label="Mostrar menu"
+      onkeydown="if (event.key === 'Enter') toggleHeader();"
+    >
       ↑ Mostrar menu
     </div>
 
     <!-- ===== CONTEÚDO PRINCIPAL ===== -->
-    <main id="main-content" style="display:none" aria-label="Grade de lives">
-      <div id="lives-grid"></div>
+    <main id="main-content" style="display: none" aria-label="Grade de lives">
+      <div id="lives-grid" class="lives-grid-container"></div>
     </main>
 
     <!-- BOTÃO SAIR DO FULLSCREEN -->
-    <button id="exit-fs" onclick="toggleFullscreen()" type="button" aria-label="Sair do modo tela cheia">
+    <button
+      id="exit-fs"
+      onclick="toggleFullscreen()"
+      type="button"
+      aria-label="Sair do modo tela cheia"
+    >
       ✕ Sair da tela cheia
     </button>
 
     <!-- TOAST -->
-    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div
+      id="toast"
+      class="toast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
 
     <script src="app.js"></script>
   </body>
