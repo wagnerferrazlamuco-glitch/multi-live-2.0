@@ -32,13 +32,19 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MS = 60_000; // 1 minuto
 
 // ===== INICIALIZAÇÃO =====
-window.addEventListener("supabase-ready", async () => {
+async function inicializarApp() {
   setupAuthToggle();
   setupPasswordStrength();
   await diagnosticarConexao();
   await checkAuthStatus();
   setupEventListeners();
-});
+}
+
+if (window.supabaseClient) {
+  inicializarApp();
+} else {
+  window.addEventListener("supabase-ready", inicializarApp);
+}
 
 // ===== DIAGNÓSTICO =====
 async function diagnosticarConexao() {
