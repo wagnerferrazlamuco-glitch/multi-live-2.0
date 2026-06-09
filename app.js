@@ -527,14 +527,18 @@ async function addLive() {
       return;
     }
 
-    const { error } = await supabaseClient.from("user_lives").insert([
-      {
-        user_id: currentUser.id,
-        url: rawUrl,
-        type: embedData.type,
-        embed_id: embedData.id,
-      },
-    ]);
+    const { data: inserted, error } = await supabaseClient
+      .from("user_lives")
+      .insert([
+        {
+          user_id: currentUser.id,
+          url: rawUrl,
+          type: embedData.type,
+          embed_id: embedData.id,
+        },
+      ])
+      .select()
+      .single();
 
     if (error) {
       showToast("Erro ao adicionar live.", "error");
@@ -545,7 +549,15 @@ async function addLive() {
     urlInput.value = "";
     urlInput.focus();
     showToast("Live adicionada!", "success");
-    await renderLives();
+
+    // Adiciona apenas a nova live ao DOM, sem recriar os iframes
+    // existentes (evita que os vídeos em andamento voltem ao início).
+    const emptyState = grid.querySelector(".empty-state");
+    if (emptyState) emptyState.remove();
+
+    addLiveToDOM(inserted, true);
+    updateLiveCountBadge();
+    updateGridLayout();
   } catch (err) {
     showToast("Erro ao adicionar live.", "error");
     console.error(err);
@@ -613,7 +625,7 @@ function toggleHeader() {
 }
 
 // ===== DOM: ADICIONAR LIVE =====
-function addLiveToDOM(live) {
+function addLiveToDOM(live, prepend = false) {
   const container = document.createElement("div");
   container.className = "live-container";
   container.id = `live-${live.id}`;
@@ -643,7 +655,11 @@ function addLiveToDOM(live) {
     ></iframe>
   `;
 
-  grid.appendChild(container);
+  if (prepend) {
+    grid.prepend(container);
+  } else {
+    grid.appendChild(container);
+  }
 }
 
 // ===== EMBED SRC =====
