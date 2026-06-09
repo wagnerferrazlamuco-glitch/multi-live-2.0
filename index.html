@@ -164,42 +164,6 @@
     <!-- TOAST -->
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <script>
-      (function() {
-        const script = document.createElement('script');
-        script.src = 'supabase-config.js';
-        script.onload = () => console.log('⚡ Supabase configurado via arquivo local.');
-        script.onerror = () => {
-          console.log('🌐 supabase-config.js não encontrado. Carregando credenciais da Vercel via API...');
-          fetch('/api/config')
-            .then(res => {
-              if (!res.ok) throw new Error('API de configuração indisponível');
-              return res.json();
-            })
-            .then(config => {
-              if (!window.supabase) {
-                throw new Error('SDK do Supabase não foi encontrado na página');
-              }
-              window.supabaseClient = window.supabase.createClient(config.url, config.key, {
-                auth: {
-                  storageKey: "multilive_auth",
-                  autoRefreshToken: true,
-                  persistSession: true,
-                  detectSessionInUrl: true,
-                }
-              });
-              window.dispatchEvent(new Event("supabase-ready"));
-              console.log('✅ Supabase inicializado via API da Vercel.');
-            })
-            .catch(err => {
-              console.error('❌ Erro crítico ao conectar com Supabase:', err);
-              // Força o evento para que o app chame diagnosticarConexao() e mostre o banner de erro
-              window.dispatchEvent(new Event("supabase-ready"));
-            });
-        };
-        document.head.appendChild(script);
-      })();
-    </script>
     <script src="app.js"></script>
   </body>
 </html>

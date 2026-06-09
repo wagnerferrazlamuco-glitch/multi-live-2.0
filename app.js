@@ -33,18 +33,40 @@ const LOCKOUT_MS = 60_000; // 1 minuto
 
 // ===== INICIALIZAÇÃO =====
 async function inicializarApp() {
-  setupAuthToggle();
-  setupPasswordStrength();
-  await diagnosticarConexao();
-  await checkAuthStatus();
-  setupEventListeners();
+  try {
+    // Busca as chaves do Supabase na API local ou de produção
+    const response = await fetch('/api/config');
+    if (!response.ok) {
+      throw new Error('Falha ao buscar configurações do Supabase na API');
+    }
+    const config = await response.json();
+
+    // Inicializa o cliente do Supabase
+    window.supabaseClient = window.supabase.createClient(
+      config.url,
+      config.key,
+      {
+        auth: {
+          storageKey: "multilive_auth",
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      }
+    );
+
+    setupAuthToggle();
+    setupPasswordStrength();
+    await diagnosticarConexao();
+    await checkAuthStatus();
+    setupEventListeners();
+  } catch (error) {
+    console.error('❌ Erro crítico ao inicializar o aplicativo:', error);
+    mostrarAvisoBanner("❌ Não foi possível conectar ao Supabase. Verifique a configuração.");
+  }
 }
 
-if (window.supabaseClient) {
-  inicializarApp();
-} else {
-  window.addEventListener("supabase-ready", inicializarApp);
-}
+inicializarApp();
 
 // ===== DIAGNÓSTICO =====
 async function diagnosticarConexao() {

@@ -1,5 +1,6 @@
 # Local Supabase config (do not commit real keys)
 supabase-config.js
+.dev.vars
 .env
 .env.local
 .env.*
