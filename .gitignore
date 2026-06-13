@@ -11,6 +11,9 @@ node_modules/
 # Vercel
 .vercel/
 
+# Cloudflare Wrangler (cache/estado/build local)
+.wrangler/
+
 # Build outputs
 dist/
 build/

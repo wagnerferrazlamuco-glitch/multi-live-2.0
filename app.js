@@ -549,7 +549,10 @@ async function addLive() {
     }
 
     if (inserted) {
-      addLiveToDOM(inserted);
+      const emptyState = grid.querySelector(".empty-state");
+      if (emptyState) emptyState.remove();
+
+      addLiveToDOM(inserted, true);
       updateLiveCountBadge();
       updateGridLayout();
     }
@@ -607,16 +610,6 @@ function refreshLive(id) {
   }, 100);
 }
 
-function refreshLive(id) {
-  const iframe = document.querySelector(`iframe[data-id="${id}"]`);
-  if (!iframe) return;
-  const src = iframe.src;
-  iframe.src = "";
-  setTimeout(() => {
-    iframe.src = src;
-  }, 100);
-}
-
 /**
  * Simula atualização de espectadores
  */
@@ -657,11 +650,11 @@ function toggleHeader() {
 }
 
 // ===== DOM: ADICIONAR LIVE =====
-function addLiveToDOM(live) {
-  const block = document.createElement("div");
-  block.className = "live-block";
-  block.id = `live-${live.id}`;
-  block.dataset.liveId = live.id;
+function addLiveToDOM(live, prepend = false) {
+  const container = document.createElement("div");
+  container.className = "live-block";
+  container.id = `live-${live.id}`;
+  container.dataset.liveId = live.id;
 
   const platformClass = live.type === "youtube" ? "youtube" : "twitch";
   const platformLabel = live.type === "youtube" ? "▶ YouTube" : "🟣 Twitch";
@@ -673,7 +666,7 @@ function addLiveToDOM(live) {
     <button class="control-btn btn-remove" onclick="removeLive('${live.id}')" title="Remover" type="button" aria-label="Remover live">✕</button>
   `;
 
-  block.innerHTML = `
+  const html = `
     <!-- VIDEO WRAPPER -->
     <div class="live-video-wrapper">
       <span class="live-platform-badge ${platformClass}" aria-hidden="true">${platformLabel}</span>
@@ -690,7 +683,12 @@ function addLiveToDOM(live) {
     </div>
   `;
 
-  grid.appendChild(block);
+  container.innerHTML = html;
+  if (prepend) {
+    grid.prepend(container);
+  } else {
+    grid.appendChild(container);
+  }
 }
 
 // ===== EMBED SRC =====
